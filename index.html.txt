@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>柳川環境教育生態互動 3.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            margin: 0;
+            background: #eaf7f3;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(90deg, #3a7d44, #64a66b);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            background: #4e8f5c;
+        }
+        nav a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav a:hover {
+            background: #76b68b;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 { color: #3a7d44; }
+        img { width: 100%; border-radius: 8px; }
+
+        #fish-game {
+            position: relative;
+            height: 200px;
+            background: #a4d7e1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .fish {
+            position: absolute;
+            width: 50px;
+            cursor: pointer;
+        }
+
+        #trash-game {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .trash {
+            width: 60px;
+            margin: 10px;
+            cursor: grab;
+        }
+        .bin {
+            width: 100px;
+            height: 120px;
+            margin: 10px;
+            border: 2px dashed #3a7d44;
+            text-align: center;
+            padding-top: 40px;
+            background: #f9fff9;
+        }
+
+        .quiz-option {
+            display: block;
+            background: #e0f5e9;
+            margin: 5px 0;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .quiz-option:hover { background: #c2ebd4; }
+
+        #ar-view {
+            width: 100%;
+            height: 250px;
+            background: black;
+            color: white;
+            text-align: center;
+            line-height: 250px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            background: #3a7d44;
+            color: white;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>柳川環境教育生態互動 3.0</h1>
+    <p>探索柳川生態，挑戰自我，守護環境！</p>
+</header>
+<nav>
+    <a href="#intro">柳川簡介</a>
+    <a href="#games">互動遊戲</a>
+    <a href="#quiz-section">環境問答</a>
+    <a href="#ar">AR探索</a>
+    <a href="#stats">排行榜</a>
+</nav>
+
+<div class="container" id="intro">
+    <h2>柳川簡介</h2>
+    <p>柳川位於台中市，是結合生態保育與城市美學的重要河川，經過整治後成為親水休憩、環境教育與生態保護的核心空間。</p>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Liuchuan_Taichung.jpg" alt="柳川照片">
+</div>
+
+<div class="container" id="games">
+    <h2>互動遊戲</h2>
+    <h3>1. 魚群保育遊戲</h3>
+    <div id="fish-game"></div>
+    <p id="fish-score">分數：0</p>
+
+    <h3>2. 垃圾分類挑戰</h3>
+    <div id="trash-game">
+        <img src="https://cdn-icons-png.flaticon.com/512/1046/1046784.png" class="trash" draggable="true" data-type="recycle">
+        <img src="https://cdn-icons-png.flaticon.com/512/1046/1046857.png" class="trash" draggable="true" data-type="organic">
+        <img src="https://cdn-icons-png.flaticon.com/512/1046/1046861.png" class="trash" draggable="true" data-type="general">
+        <div class="bin" data-type="recycle">回收桶</div>
+        <div class="bin" data-type="organic">廚餘桶</div>
+        <div class="bin" data-type="general">一般垃圾</div>
+    </div>
+    <p id="trash-score">正確分類：0</p>
+</div>
+
+<div class="container" id="quiz-section">
+    <h2>環境問答挑戰</h2>
+    <div id="quiz"></div>
+    <button onclick="showResult()">提交答案</button>
+    <p id="quiz-result"></p>
+</div>
+
+<div class="container" id="ar">
+    <h2>AR 生態探索</h2>
+    <div id="ar-view">[模擬AR相機 - 點擊啟動]</div>
+    <button onclick="startAR()">啟動AR探索</button>
+</div>
+
+<div class="container" id="stats">
+    <h2>排行榜</h2>
+    <ol id="leaderboard"></ol>
+</div>
+
+<footer>&copy; 2025 柳川環境教育專案</footer>
+
+<script>
+    let fishScore = 0;
+    function spawnFish() {
+        const fish = document.createElement('img');
+        fish.src = 'https://cdn-icons-png.flaticon.com/512/616/616408.png';
+        fish.className = 'fish';
+        fish.style.top = Math.random() * 150 + 'px';
+        fish.style.left = Math.random() * 350 + 'px';
+        fish.onclick = () => {
+            fishScore++;
+            document.getElementById('fish-score').textContent = '分數：' + fishScore;
+            updateLeaderboard();
+            fish.remove();
+        };
+        document.getElementById('fish-game').appendChild(fish);
+        setTimeout(() => fish.remove(), 2000);
+    }
+    setInterval(spawnFish, 1500);
+
+    let trashScore = 0;
+    const trashItems = document.querySelectorAll('.trash');
+    const bins = document.querySelectorAll('.bin');
+    trashItems.forEach(item => {
+        item.addEventListener('dragstart', e => e.dataTransfer.setData('type', item.dataset.type));
+    });
+    bins.forEach(bin => {
+        bin.addEventListener('dragover', e => e.preventDefault());
+        bin.addEventListener('drop', e => {
+            if (e.dataTransfer.getData('type') === bin.dataset.type) {
+                trashScore++;
+                document.getElementById('trash-score').textContent = '正確分類：' + trashScore;
+                updateLeaderboard();
+            }
+        });
+    });
+
+    const quizQuestions = [
+        { q: "柳川最常見的原生魚種是？", options: ["台灣馬口魚", "食人魚", "鯊魚"], answer: 0 },
+        { q: "保護柳川環境最重要的是？", options: ["丟垃圾", "減少污染", "捕魚比賽"], answer: 1 }
+    ];
+    let quizAnswers = [];
+    const quizDiv = document.getElementById('quiz');
+    quizQuestions.forEach((q, i) => {
+        const div = document.createElement('div');
+        div.innerHTML = `<p>${q.q}</p>`;
+        q.options.forEach((opt, j) => {
+            const btn = document.createElement('div');
+            btn.className = 'quiz-option';
+            btn.textContent = opt;
+            btn.onclick = () => quizAnswers[i] = j;
+            div.appendChild(btn);
+        });
+        quizDiv.appendChild(div);
+    });
+
+    function showResult() {
+        let score = 0;
+        quizQuestions.forEach((q, i) => { if (quizAnswers[i] === q.answer) score++; });
+        document.getElementById('quiz-result').textContent = `你的得分：${score}/${quizQuestions.length}`;
+        localStorage.setItem('quizScore', score);
+        updateLeaderboard();
+    }
+
+    function startAR() {
+        document.getElementById('ar-view').textContent = 'AR模式已啟動：掃描柳川生態！';
+    }
+
+    function updateLeaderboard() {
+        const scores = [
+            { name: "魚群保育", score: fishScore },
+            { name: "垃圾分類", score: trashScore },
+            { name: "問答挑戰", score: parseInt(localStorage.getItem('quizScore') || "0") }
+        ];
+        scores.sort((a, b) => b.score - a.score);
+        const leaderboard = document.getElementById('leaderboard');
+        leaderboard.innerHTML = "";
+        scores.forEach(s => {
+            const li = document.createElement('li');
+            li.textContent = `${s.name}: ${s.score}`;
+            leaderboard.appendChild(li);
+        });
+    }
+    updateLeaderboard();
+</script>
+</body>
+</html>
